@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ibovespa histórico</title>
+<style>
+/* Layout: uma coluna — controles, gráfico, faixa de estatísticas do período, tabela de escolhas presidenciais.
+   Sem recursos externos: fontes do sistema, biblioteca do gráfico em vendor/. */
+:root{
+  --bg:#f5f7f6; --panel:#ffffff; --fg:#16201d; --muted:#5d6b66; --line:#dbe2df;
+  --accent:#0d7a5f; --accent-soft:rgba(13,122,95,.12); --elec:#b4561b; --up:#0d7a5f; --down:#c0392b;
+  --display:system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,"Liberation Mono",monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --panel:#161e1b; --fg:#e4ebe8; --muted:#93a39d; --line:#26322e;
+  --accent:#3fc59d; --accent-soft:rgba(63,197,157,.14); --elec:#f0a05c; --up:#3fc59d; --down:#ff7a6b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --panel:#161e1b; --fg:#e4ebe8; --muted:#93a39d; --line:#26322e;
+  --accent:#3fc59d; --accent-soft:rgba(63,197,157,.14); --elec:#f0a05c; --up:#3fc59d; --down:#ff7a6b; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.4 var(--display)}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px;display:grid;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px}
+h1{font-size:clamp(22px,3.2vw,32px);font-weight:800;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 span{color:var(--accent)}
+h2{font-size:18px;margin:8px 0 0}
+.ultimo{font-family:var(--mono);font-size:14px;color:var(--muted)}
+.ultimo b{color:var(--fg);font-size:18px}
+.controles{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{font:600 13px var(--display);background:none;border:0;color:var(--muted);padding:7px 11px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.seg button:focus-visible,.chk input:focus-visible,tbody tr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.chk{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer}
+.datas{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.datas input{font:13px var(--mono);background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 6px}
+#grafico{width:100%;height:clamp(340px,58vh,560px);background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.stats{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--panel);padding:12px 14px;display:grid;gap:4px;min-width:0}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.stat .v{font:600 17px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+.stat .s{font:12px var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden}
+.pos{color:var(--up)} .neg{color:var(--down)} .mut{color:var(--muted)}
+.nota{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
+.tabela{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+th:nth-child(-n+2),td:nth-child(-n+2){text-align:left}
+td{font-family:var(--mono);font-variant-numeric:tabular-nums}
+td:nth-child(2){font-family:var(--display)}
+tbody tr{cursor:pointer} tbody tr:hover{background:var(--accent-soft)}
+tbody tr:last-child td{border-bottom:0}
+.det{color:var(--muted);font-size:12px}
+.vice{color:var(--elec)}
+.barra{display:inline-block;height:8px;border-radius:2px;vertical-align:middle;margin-left:8px;background:currentColor;opacity:.55}
+.tip{border-collapse:collapse;font-size:12px}
+.tip td{padding:2px 0;border:0;font-family:var(--mono);text-align:right}
+.tip td:first-child{text-align:left;padding-right:14px;color:var(--muted)}
+footer{font-size:12px;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Ibovespa <span id="anos">1968</span></h1>
+    <div class="ultimo" id="ultimo"></div>
+  </header>
+
+  <div class="controles">
+    <div class="seg" role="group" aria-label="Período" id="periodos">
+      <button data-anos="1">1A</button><button data-anos="5">5A</button><button data-anos="10">10A</button>
+      <button data-desde="1994-07-01">Pós-Real</button><button data-anos="0" aria-pressed="true">Tudo</button>
+    </div>
+    <div class="seg" role="group" aria-label="Escala" id="escala">
+      <button data-escala="log">Log</button><button data-escala="value" aria-pressed="true">Linear</button>
+    </div>
+    <div class="seg" role="group" aria-label="Correção pela inflação" id="correcao">
+      <button data-modo="nom">Nominal</button><button data-modo="ipca" aria-pressed="true">Real · IPCA</button><button data-modo="igpdi">Real · IGP-DI</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="mostrarEventos" checked> Eleições</label>
+    <span class="datas"><input type="date" id="dataDe" aria-label="Data inicial"> até <input type="date" id="dataAte" aria-label="Data final"></span>
+  </div>
+
+  <p class="nota" id="notaModo" hidden></p>
+  <div id="grafico" role="img" aria-label="Gráfico do fechamento diário do Ibovespa"></div>
+  <div class="stats" id="stats"></div>
+
+  <h2>Reação às escolhas presidenciais</h2>
+  <p class="nota">Variação contra o fechamento do último pregão antes da votação; segue o modo escolhido acima (nominal ou real). "Semana" é o 5º pregão depois da votação. Até 1985 o presidente foi escolhido de forma indireta, pelo Congresso (1969) ou pelo Colégio Eleitoral (1974–1985). * Votação ou posse em dia de pregão: a variação inclui o pregão do próprio dia. "→" indica o vice que assumiu a presidência no mandato; as linhas com ▸ marcam o dia em que ele assumiu (interinamente, quando houve afastamento). Clique numa linha para ver o período no gráfico.</p>
+  <div class="tabela"><table>
+    <thead><tr><th>Ano</th><th>Escolhido</th><th>Véspera</th><th>Dia seguinte</th><th>Semana</th></tr></thead>
+    <tbody id="eventos"></tbody>
+  </table></div>
+
+  <footer><span id="infoRecente"></span>Fonte: B3 (planilha IBOVDIA 1968–1997 e "Evolução Diária" 1998 em diante). Inflação: IPCA (IBGE, a partir de 1980) e IGP-DI (FGV), mensais, via Banco Central; no modo real a inflação do mês é distribuída pelos dias. No modo nominal, antes de 1994 as variações incluem inflação alta. Nos primeiros anos a B3 publica poucos algarismos significativos. Gráfico: Apache ECharts.</footer>
+</div>
+
+<script src="vendor/echarts.min.js"></script>
+<script src="dados_historicos.js"></script>
+<script src="eventos.js"></script>
+<script src="ibov_recente.js"></script>  <!-- opcional: gerado por atualizar_ibov.py -->
+<script src="app.js"></script>
+</body>
+</html>
