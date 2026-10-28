@@ -44,5 +44,6 @@ window.IBOV_EVENTOS = {
     { desde: "12/05/2016", nome: "Temer" },
     { desde: "01/01/2019", nome: "Bolsonaro" },
     { desde: "01/01/2023", nome: "Lula" }
+    { desde: "01/01/2027", nome: "Lula" }
   ]
 };
