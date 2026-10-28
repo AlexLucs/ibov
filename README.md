@@ -26,10 +26,10 @@ O padrão ao abrir é escala **Linear** e correção **Real · IPCA**.
 |---|---|---|
 | `index.html` | Estrutura e estilo da página | você, raramente |
 | `app.js` | Toda a lógica da página (comentada) | você, raramente |
-| `dados_historicos.js` | Fechamentos de 02/01/1968 a 26/10/2026 e inflação mensal até 09/2026, embutidos | uma vez por ano (ver "Virada de ano") |
+| `dados_historicos.js` | Fechamentos consolidados desde 02/01/1968 (até a data do campo `completoAte`) e inflação mensal | o script, automaticamente na virada de ano |
 | `eventos.js` | Escolhas presidenciais, posses de vices e governos | você, à mão, quando houver eleição |
-| `ibov_recente.js` | Fechamentos de `ANO_INICIAL` até hoje e inflação dos últimos 3 anos | o script, automaticamente |
-| `atualizar_ibov.py` | Baixa os dados recentes e grava `ibov_recente.js` | — |
+| `ibov_recente.js` | Fechamentos depois de `completoAte` e inflação dos últimos 3 anos | o script, automaticamente |
+| `atualizar_ibov.py` | Baixa os dados, grava `ibov_recente.js` e faz a virada de ano em `dados_historicos.js` | — |
 | `requirements.txt` | Dependências do script | Dependabot |
 | `vendor/echarts.min.js` | Apache ECharts 5.4.3 (biblioteca do gráfico, licença Apache 2.0) | — |
 | `.github/workflows/atualizar.yml` | Execução diária no GitHub Actions | — |
@@ -48,15 +48,18 @@ py atualizar_ibov.py
 
 Saídas possíveis:
 
-- `OK: 206 pregões até 28/10/2026 (B3); IPCA até 09/2026 -> ibov_recente.js`: arquivo atualizado.
-- `Sem dados novos (último pregão ...)`: nada mudou desde a última execução; o arquivo não é tocado.
-- `ERRO: ... ibov_recente.js não foi alterado.` (código de saída 1): os dados baixados não passaram na validação (série vazia, datas repetidas, valor ≤ 0, variação diária acima de 25%, ou série terminando antes da versão já publicada). O arquivo anterior continua valendo.
+- `OK: histórico até 26/10/2026; recente com 2 pregões até 28/10/2026 (B3); IPCA até 09/2026.`: arquivos atualizados.
+- `Virada de ano: ...`: o script moveu dados para o histórico (ver "Virada de ano").
+- `Sem dados novos (último pregão ...)`: nada mudou desde a última execução; nenhum arquivo é tocado.
+- `ERRO: ... Nenhum arquivo foi alterado.` (código de saída 1): os dados baixados não passaram na validação (datas repetidas ou fora de ordem, valor ≤ 0, variação diária acima de 25%, salto entre o histórico e os dados novos, ou série terminando antes da versão já publicada). Os arquivos anteriores continuam valendo.
+
+Para ver o que o script faria sem gravar nada, use `py atualizar_ibov.py --simular`.
 
 O script tenta a B3 primeiro. Se a B3 falhar num ano, só aquele ano vem do Yahoo Finance; o `yfinance` é instalado na hora, na versão fixada no script, só se for preciso. A fonte usada aparece na saída e no rodapé da página.
 
 ### Automático no GitHub
 
-O workflow `.github/workflows/atualizar.yml` roda de segunda a sexta às 19:30 de Brasília (depois do fechamento) e faz commit do `ibov_recente.js` apenas quando os dados mudam.
+O workflow `.github/workflows/atualizar.yml` roda de segunda a sexta às 19:30 de Brasília (depois do fechamento) e faz commit de `ibov_recente.js` e `dados_historicos.js` apenas quando os dados mudam. Commits que alteram o histórico levam "(histórico consolidado)" na mensagem.
 
 1. Crie o repositório com todos os arquivos desta pasta (inclusive `.github/`).
 2. Em **Settings → Actions → General → Workflow permissions**, deixe **Read and write permissions** (o workflow precisa fazer commit).
@@ -70,17 +73,18 @@ Observações:
 - **Agendamento parado:** o GitHub desativa agendamentos de repositórios públicos sem atividade por 60 dias. Como há commits quase todo dia útil, isso não deve ocorrer; se ocorrer, reative na aba Actions.
 - **Execuções simultâneas:** nunca há duas execuções ao mesmo tempo (`concurrency`), e o push faz `pull --rebase` antes, então um push seu no meio da execução não derruba o job.
 
-## Virada de ano (uma vez por ano)
+## Virada de ano (automática)
 
-`ibov_recente.js` começa em 1º de janeiro de `ANO_INICIAL` e cresce ao longo do tempo. Uma vez por ano, por exemplo em janeiro, incorpore os dados recentes ao arquivo histórico:
+O script cuida disso sozinho; não há nada para editar.
 
-1. Gere um `dados_historicos.js` novo que inclua tudo até 31/12 do ano que terminou. A forma mais simples é mandar o `ibov_recente.js` atual para quem mantém a página. O formato do histórico está descrito no cabeçalho do próprio arquivo.
-2. Em `atualizar_ibov.py`, mude `ANO_INICIAL` para o ano novo.
-3. Rode `py atualizar_ibov.py` e confira a página.
+- `dados_historicos.js` tem o campo `completoAte`, a data até onde os fechamentos estão consolidados.
+- `ibov_recente.js` traz só os pregões **depois** dessa data. Por isso a página nunca tem buraco entre os dois arquivos.
+- A cada execução, o script baixa da B3 os anos a partir do dia seguinte a `completoAte`. No ano corrente isso é só o próprio ano. Em janeiro, entra também o ano que terminou.
+- **Virada de ano:** na primeira execução de um ano novo, os pregões do ano encerrado saem do `ibov_recente.js` e entram no `dados_historicos.js`, e `completoAte` passa a ser 31/12. Por segurança, o ano só é consolidado se o último pregão dele for de 20/12 em diante; caso contrário, a consolidação fica para a próxima execução.
+- **Inflação:** um mês entra no histórico quando IPCA e IGP-DI daquele mês já foram publicados e o mês está dentro do período consolidado. O IPCA de dezembro sai por volta de 10 de janeiro, então dezembro entra alguns dias depois dos pregões. Até lá, a página usa a inflação do `ibov_recente.js`, que sempre traz os últimos 3 anos.
+- **Ordem de gravação:** o histórico é gravado antes do arquivo recente. Se a execução for interrompida entre os dois, a página continua sem buraco.
 
-Se você esquecer, nada quebra: o arquivo recente só fica maior.
-
-A regra que liga os dois arquivos: `ibov_recente.js` precisa começar **no máximo** no dia seguinte ao último pregão de `dados_historicos.js`, senão aparece um buraco no gráfico.
+Para conferir antes de acontecer, rode `py atualizar_ibov.py --simular` em janeiro: a saída mostra as linhas `Virada de ano: ...` sem gravar nada.
 
 ## Eventos políticos (`eventos.js`)
 
