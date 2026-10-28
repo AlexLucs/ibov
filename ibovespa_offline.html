@@ -75,10 +75,10 @@ footer{font-size:12px;color:var(--muted);line-height:1.5}
       <button data-from="1994-07-01">Pós-Real</button><button data-y="0" aria-pressed="true">Tudo</button>
     </div>
     <div class="seg" role="group" aria-label="Escala" id="scale">
-      <button data-s="log" aria-pressed="true">Log</button><button data-s="value">Linear</button>
+      <button data-s="log">Log</button><button data-s="value" aria-pressed="true">Linear</button>
     </div>
     <div class="seg" role="group" aria-label="Correção" id="infl">
-      <button data-m="nom" aria-pressed="true">Nominal</button><button data-m="enc">Real · IPCA</button><button data-m="igp">Real · IGP-DI</button>
+      <button data-m="nom">Nominal</button><button data-m="enc" aria-pressed="true">Real · IPCA</button><button data-m="igp">Real · IGP-DI</button>
     </div>
     <label class="chk"><input type="checkbox" id="showElec" checked> Eleições</label>
     <span class="dates"><input type="date" id="dFrom" aria-label="Data inicial"> até <input type="date" id="dTo" aria-label="Data final"></span>
@@ -173,12 +173,12 @@ function priceAt(kind,t){const d=new Date(t),y=d.getUTCFullYear(),m=d.getUTCMont
   const dim=new Date(Date.UTC(y,m+1,0)).getUTCDate(), f=(d.getUTCDate()-1)/dim;
   return L[k]*Math.pow(1+arr[k]/100,f);}
 const PX={enc:T.map(t=>priceAt('enc',t)),igp:T.map(t=>priceAt('igp',t))};
-let mode='nom', anchor=N-1, Y=V.slice();
+let mode='enc', anchor=N-1, Y=V.slice();
 let PK=[];
 function peaks(){PK=new Array(N);let m=-Infinity;for(let i=0;i<N;i++){if(Y[i]>m)m=Y[i];PK[i]=m}}
 function recompute(){ if(mode==='nom'){Y=V.slice();}
   else{const P=PX[mode], pa=P[anchor]; Y=V.map((v,i)=>v*pa/P[i]);} peaks(); }
-peaks();
+recompute();
 const ELEC=[
  ["1985","15/03/1985","Sarney","vice","assume no lugar de Tancredo; efetivado em 21/04/1985"],
  ["1992","02/10/1992","Itamar","vice","assume com o afastamento de Collor; efetivado em 29/12/1992"],
@@ -219,7 +219,7 @@ document.getElementById('last').innerHTML=`Último fechamento ${fmtD(T[N-1])}: <
 
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const chart=echarts.init(document.getElementById('chart'),null,{renderer:'canvas'});
-let scale='log', showElec=true;
+let scale='value', showElec=true;
 const dataOf=()=>T.map((t,i)=>[t,Y[i]]);
 const WD=['dom','seg','ter','qua','qui','sex','sáb'];
 function tipHtml(xv){
@@ -291,6 +291,7 @@ function fitStats(){document.querySelectorAll('#stats .v,#stats .s').forEach(el=
 function press(group,btn){group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'))}
 
 render(false);
+updateNote();
 let zt=null;
 function refreshReal(){const [,j]=curRange();if(mode==='nom'||j===anchor)return;anchor=j;recompute();
   chart.setOption({series:[{data:dataOf()}]});renderElec();updateStats();updateNote();}
