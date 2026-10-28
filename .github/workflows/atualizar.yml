@@ -5,16 +5,21 @@ on:
     - cron: "30 22 * * 1-5"   # 19:30 de Brasília, seg–sex (pregão fecha às 17h)
   workflow_dispatch:           # botão "Run workflow" para rodar na hora
 
-permissions:
-  contents: write
+# Nunca roda duas atualizações ao mesmo tempo (agendada + manual).
+concurrency:
+  group: atualizar-ibov
+  cancel-in-progress: false
 
 jobs:
   atualizar:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write          # necessário só para o commit do ibov_recente.js
     steps:
-      - uses: actions/checkout@v5
+      # Actions fixadas por SHA (a tag pode ser movida; o SHA não). O Dependabot propõe atualizações.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803        # v6.1.0
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1    # v6.3.0
         with:
           python-version: "3.12"
           cache: pip
@@ -30,7 +35,8 @@ jobs:
           git add ibov_recente.js
           if git diff --cached --quiet; then
             echo "Sem dados novos."
-          else
-            git commit -m "dados: $(date -u +%Y-%m-%d)"
-            git push
+            exit 0
           fi
+          git commit -m "dados: $(TZ=America/Sao_Paulo date +%Y-%m-%d)"
+          git pull --rebase --autostash
+          git push
