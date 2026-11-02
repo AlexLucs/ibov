@@ -11,12 +11,12 @@ Abra o `index.html` no navegador (dois cliques) ou acesse o endereço do GitHub 
 | **1A · 5A · 10A · Pós-Real · Tudo** | Período mostrado. Zoom manual (roda do mouse, arrastar no gráfico ou na barra de baixo) desmarca os botões. |
 | **Log · Linear** | Escala do eixo vertical. Log é melhor para comparar variações percentuais ao longo de décadas. |
 | **Nominal · Real · IPCA · Real · IGP-DI** | Correção pela inflação. No modo real, os valores ficam em pontos da **última data visível** (se o zoom mostra 1985–1995, tudo aparece em pontos do fim desse intervalo). "Real · IPCA" usa IGP-DI antes de 1980, quando o IPCA ainda não existia. |
-| **Eleições** | Liga e desliga as linhas verticais: escolhas diretas (tracejado laranja), indiretas (pontilhado) e posses de vices (cinza com o nome). |
+| **Eleições** | Liga e desliga as linhas verticais: escolhas diretas (tracejado laranja), indiretas (pontilhado) e posses de vices (cinza com o nome). Cada linha fica no último pregão antes do evento, então todo o movimento do dia do evento aparece à direita dela. |
 | **Datas** | Escolhe o intervalo exato. |
 
 - **Crosshair:** ao passar o mouse aparecem data, fechamento (e o nominal, no modo real), variação no dia, variação desde o início do período visível, distância até o topo anterior, quem governava e, entre a eleição e a posse, quem foi eleito.
-- **Quadros abaixo do gráfico:** estatísticas do período visível (variação, média ao ano, máxima, mínima, maior queda a partir de um topo, melhor e pior dia).
-- **Tabela de escolhas presidenciais:** variação do índice no primeiro pregão e no 5º pregão após cada votação ou posse, contra o último fechamento antes dela. Clique numa linha para ver os 45 dias antes e depois no gráfico. "aguardando" = ainda não houve pregão depois do evento.
+- **Quadros abaixo do gráfico:** estatísticas do período visível (variação, máxima, mínima, maior queda a partir de um topo, melhor e pior dia).
+- **Tabela de escolhas presidenciais:** variação do índice no primeiro pregão e no 5º pregão após cada votação ou posse, contra o último fechamento antes dela. A mais recente fica no topo. Clique numa linha para ver os 45 dias antes e depois no gráfico. "aguardando" = ainda não houve pregão depois do evento.
 
 O padrão ao abrir é escala **Linear** e correção **Real · IPCA**.
 

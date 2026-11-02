@@ -216,7 +216,7 @@
       const celSemana = r.semana != null ? `<td class="${classeSinal(r.semana)}">${fmtPct(r.semana)}</td>`
         : `<td class="mut">${r.dia == null ? 'aguardando' : 'em andamento'}</td>`;
       return `<tr tabindex="0" data-k="${k}"><td>${ano}</td><td>${marca}${esc(ev.nome)}${detalhe}</td><td>${vespera}</td>${celDia}${celSemana}</tr>`;
-    }).join('');
+    }).reverse().join('');                                   // mais recente no topo
   }
 
   // ------------------------------------------------------------ tooltip (crosshair)
@@ -252,7 +252,8 @@
     const elec = corToken('--elec'), mut = corToken('--muted');
     return escolhas.map(ev => ({
       name: ev.tipo === 'vice' ? ev.nomePrincipal : ev.ano,
-      xAxis: ev.t,
+      // No último pregão antes do evento: todo o movimento do dia do evento fica à direita da linha.
+      xAxis: (b => (b >= 0 ? DATAS[b] : ev.t))(indiceAntes(ev.t)),
       lineStyle: ev.tipo === 'vice' ? { type: [2, 4], color: mut }
         : ev.tipo === 'indireta' ? { type: 'dotted', color: elec, opacity: 0.7 } : { color: elec },
       label: { color: ev.tipo === 'vice' ? mut : elec },
@@ -339,7 +340,7 @@
 
   /** Reduz a fonte de quem não cabe na largura, num passo só (sem loop de layout). */
   function ajustarTextosStats() {
-    for (const el of document.querySelectorAll('#stats .v, #stats .s')) {
+    for (const el of document.querySelectorAll('#stats .k, #stats .v, #stats .s')) {
       el.style.fontSize = '';
       if (el.scrollWidth <= el.clientWidth + 0.5) continue;
       const atual = parseFloat(getComputedStyle(el).fontSize);
@@ -366,14 +367,11 @@
       }
     }
     const total = Y[j] / Y[i] - 1;
-    const anos = (DATAS[j] - DATAS[i]) / (365.25 * DIA_MS);
-    const aoAno = anos > 0.5 ? (Y[j] / Y[i]) ** (1 / anos) - 1 : null;
     const real = estado.modo !== 'nom';
     const quadro = (k, v, s, c = '') => `<div class="stat"><span class="k">${k}</span><span class="v ${c}">${v}</span><span class="s">${s}</span></div>`;
     $('stats').innerHTML =
       quadro('Período', `${(j - i + 1).toLocaleString('pt-BR')} pregões`, `${fmtData(DATAS[i])} → ${fmtData(DATAS[j])}`) +
       quadro(real ? 'Variação real' : 'Variação', fmtPct(total), `${fmtPontos(Y[i])} → ${fmtPontos(Y[j])}`, classeSinal(total)) +
-      quadro('Ao ano', aoAno == null ? '—' : fmtPct(aoAno), real ? 'média composta acima da inflação' : 'média composta nominal', aoAno == null ? '' : classeSinal(aoAno)) +
       quadro('Máxima', fmtPontos(Y[iMax]), fmtData(DATAS[iMax])) +
       quadro('Mínima', fmtPontos(Y[iMin]), fmtData(DATAS[iMin])) +
       quadro('Maior queda do topo', fmtPct(quedaMax), `${fmtData(DATAS[qIni])} → ${fmtData(DATAS[qFim])}`, 'neg') +

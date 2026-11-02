@@ -30,21 +30,24 @@ h1 span{color:var(--accent)}
 h2{font-size:18px;margin:8px 0 0}
 .ultimo{font-family:var(--mono);font-size:14px;color:var(--muted)}
 .ultimo b{color:var(--fg);font-size:18px}
-.controles{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
-.seg button{font:600 13px var(--display);background:none;border:0;color:var(--muted);padding:7px 11px;cursor:pointer}
+/* Barra de controles: os grupos crescem até preencher exatamente a largura do conteúdo */
+.controles{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.controles>*{flex:1 1 auto}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{flex:1 1 auto;white-space:nowrap;font:600 13px var(--display);background:none;border:0;color:var(--muted);padding:7px 11px;cursor:pointer}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
 .seg button:focus-visible,.chk input:focus-visible,tbody tr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.chk{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer}
-.datas{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
-.datas input{font:13px var(--mono);background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 6px}
+.chk{display:flex;justify-content:center;gap:6px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:0 12px}
+.datas{display:flex;justify-content:center;gap:6px;align-items:center;font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:3px 6px}
+.datas input{font:13px var(--mono);background:var(--panel);color:var(--fg);border:0;padding:3px 4px}
 #grafico{width:100%;height:clamp(340px,58vh,560px);background:var(--panel);border:1px solid var(--line);border-radius:10px}
-.stats{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-@media (max-width:1100px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.stats{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+/* 7 quadros: abaixo de 1100px o 1º ocupa duas colunas, fechando 2 linhas de 4 (ou 4 de 2) sem sobra */
+@media (max-width:1100px){.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stat:first-child{grid-column:span 2}}
 @media (max-width:560px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.stat{background:var(--panel);padding:12px 14px;display:grid;gap:4px;min-width:0}
-.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.stat{background:var(--panel);padding:12px;display:grid;gap:4px;min-width:0}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;overflow:hidden}
 .stat .v{font:600 17px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
 .stat .s{font:12px var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden}
 .pos{color:var(--up)} .neg{color:var(--down)} .mut{color:var(--muted)}
@@ -64,7 +67,7 @@ tbody tr:last-child td{border-bottom:0}
 .tip{border-collapse:collapse;font-size:12px}
 .tip td{padding:2px 0;border:0;font-family:var(--mono);text-align:right}
 .tip td:first-child{text-align:left;padding-right:14px;color:var(--muted)}
-footer{font-size:12px;color:var(--muted);line-height:1.5}
+footer,.nota-tabela{font-size:12px;color:var(--muted);line-height:1.5;margin:0}
 </style>
 </head>
 <body>
@@ -94,11 +97,11 @@ footer{font-size:12px;color:var(--muted);line-height:1.5}
   <div class="stats" id="stats"></div>
 
   <h2>Reação às escolhas presidenciais</h2>
-  <p class="nota">Variação contra o fechamento do último pregão antes da votação; segue o modo escolhido acima (nominal ou real). "Semana" é o 5º pregão depois da votação. Até 1985 o presidente foi escolhido de forma indireta, pelo Congresso (1969) ou pelo Colégio Eleitoral (1974–1985). * Votação ou posse em dia de pregão: a variação inclui o pregão do próprio dia. "→" indica o vice que assumiu a presidência no mandato; as linhas com ▸ marcam o dia em que ele assumiu (interinamente, quando houve afastamento). Clique numa linha para ver o período no gráfico.</p>
   <div class="tabela"><table>
     <thead><tr><th>Ano</th><th>Escolhido</th><th>Véspera</th><th>Dia seguinte</th><th>Semana</th></tr></thead>
     <tbody id="eventos"></tbody>
   </table></div>
+  <p class="nota-tabela">Variação contra o fechamento do último pregão antes da votação; segue o modo escolhido acima (nominal ou real). "Semana" é o 5º pregão depois da votação. Até 1985 o presidente foi escolhido de forma indireta, pelo Congresso (1969) ou pelo Colégio Eleitoral (1974–1985). * Votação ou posse em dia de pregão: a variação inclui o pregão do próprio dia. "→" indica o vice que assumiu a presidência no mandato; as linhas com ▸ marcam o dia em que ele assumiu (interinamente, quando houve afastamento). Clique numa linha para ver o período no gráfico.</p>
 
   <footer><span id="infoRecente"></span>Fonte: B3 (planilha IBOVDIA 1968–1997 e "Evolução Diária" 1998 em diante). Inflação: IPCA (IBGE, a partir de 1980) e IGP-DI (FGV), mensais, via Banco Central; no modo real a inflação do mês é distribuída pelos dias. No modo nominal, antes de 1994 as variações incluem inflação alta. Nos primeiros anos a B3 publica poucos algarismos significativos. Gráfico: Apache ECharts.</footer>
 </div>
