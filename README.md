@@ -59,7 +59,9 @@ O script tenta a B3 primeiro. Se a B3 falhar num ano, só aquele ano vem do Yaho
 
 ### Automático no GitHub
 
-O workflow `.github/workflows/atualizar.yml` roda de segunda a sexta às 19:30 de Brasília (depois do fechamento) e faz commit de `ibov_recente.js` e `dados_historicos.js` apenas quando os dados mudam. Commits que alteram o histórico levam "(histórico consolidado)" na mensagem.
+O workflow `.github/workflows/atualizar.yml` roda de segunda a sexta, a partir das 18:17 de Brasília (o pregão fecha às 17h), e faz commit de `ibov_recente.js` e `dados_historicos.js` apenas quando os dados mudam. Commits que alteram o histórico levam "(histórico consolidado)" na mensagem.
+
+**Tentativas:** há quatro horários agendados por dia útil: 18:17, 20:17, 22:17 e 00:17 (Brasília). Se o pregão do dia já estiver no `ibov_recente.js`, as tentativas seguintes encerram em segundos, sem baixar nada. Se a 1ª falhar (B3 fora do ar, dado ainda não publicado), a próxima tenta de novo duas horas depois. O GitHub costuma atrasar os agendamentos em horários de pico, às vezes em algumas horas; o minuto 17 evita a hora cheia, que é a mais congestionada. Execuções manuais (**Run workflow**) sempre rodam completas.
 
 1. Crie o repositório com todos os arquivos desta pasta (inclusive `.github/`).
 2. Em **Settings → Actions → General → Workflow permissions**, deixe **Read and write permissions** (o workflow precisa fazer commit).
