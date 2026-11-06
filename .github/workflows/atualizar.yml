@@ -1,8 +1,14 @@
 name: Atualizar Ibovespa
 
 on:
+  # Horários em UTC (Brasília = UTC-3). Minuto "quebrado" de propósito: o GitHub atrasa muito os
+  # agendamentos na hora cheia e na meia hora. A 1ª tentativa é a principal; as outras só trabalham
+  # se o pregão do dia ainda não estiver no ibov_recente.js (ver passo "Já atualizado hoje?").
   schedule:
-    - cron: "30 22 * * 1-5"   # 19:30 de Brasília, seg–sex (pregão fecha às 17h)
+    - cron: "17 21 * * 1-5"   # 18:17 seg–sex — 1ª tentativa (pregão fecha às 17h)
+    - cron: "17 23 * * 1-5"   # 20:17 seg–sex — nova tentativa
+    - cron: "17 1 * * 2-6"    # 22:17 seg–sex — nova tentativa (já é o dia seguinte em UTC)
+    - cron: "17 3 * * 2-6"    # 00:17 ter–sáb — última tentativa
   workflow_dispatch:           # botão "Run workflow" para rodar na hora
 
 # Nunca roda duas atualizações ao mesmo tempo (agendada + manual).
@@ -19,16 +25,34 @@ jobs:
       # Actions fixadas por SHA (a tag pode ser movida; o SHA não). O Dependabot propõe atualizações.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1        # v7.0.1
 
+      # Nas execuções agendadas, pula tudo se o pregão do dia já foi gravado.
+      # "Dia do pregão" = data de Brasília 12 h atrás, para a tentativa depois da meia-noite
+      # continuar procurando o pregão da véspera. Execução manual nunca pula.
+      - name: Já atualizado hoje?
+        id: checar
+        run: |
+          pregao=$(TZ=America/Sao_Paulo date -d "-12 hours" +%d/%m/%Y)
+          if [ "${{ github.event_name }}" = "schedule" ] && grep -q "\"$pregao\"" ibov_recente.js; then
+            echo "Pregão de $pregao já está no ibov_recente.js; nada a fazer."
+            echo "pular=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Procurando o pregão de $pregao."
+          fi
+
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0    # v7.1.0
         with:
           python-version: "3.12"
           cache: pip
+        if: steps.checar.outputs.pular != 'true'
 
       - run: pip install -r requirements.txt
+        if: steps.checar.outputs.pular != 'true'
 
       - run: python atualizar_ibov.py
+        if: steps.checar.outputs.pular != 'true'
 
       - name: Commit se mudou
+        if: steps.checar.outputs.pular != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
