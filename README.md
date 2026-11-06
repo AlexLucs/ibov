@@ -109,7 +109,15 @@ Tipos: `direta`, `indireta` e `vice` (vice que assumiu; use `obs` para o context
 - **Ibovespa:** B3 (planilha IBOVDIA para 1968–1997; "Evolução Diária" de Estatísticas históricas a partir de 1998). Valores na escala atual de pontos, com as divisões do índice já aplicadas pela B3. Por isso os anos 60 aparecem com valores como 1×10⁻¹⁰. Nos primeiros anos a B3 publica poucos algarismos significativos.
 - **Inflação:** IPCA (IBGE, série SGS 433, a partir de 1980) e IGP-DI (FGV, série SGS 190), mensais, via API do Banco Central.
 - **Correção diária:** a inflação de cada mês é distribuída geometricamente pelos dias do mês, para não haver degraus no dia 1º. Depois do último mês divulgado, o índice de preços fica constante. O IGP-DI costuma sair alguns dias antes do IPCA, então por alguns dias do mês os dois modos reais terminam em meses diferentes; a nota acima do gráfico informa até quando cada um vai.
+- **Eventos políticos:** datas de eleições, posses e governos conferidas na Wikipédia em português.
 - **Reação a eventos:** base = último pregão antes da data. "Dia seguinte" = primeiro pregão depois da data; "Semana" = 5º pregão depois. Quando a votação ou posse caiu num dia de pregão (marcado com *), a variação inclui o pregão do próprio dia.
+
+## Versões
+
+- **Versão do projeto:** cada commit feito à mão leva o número da versão como mensagem (`0.7`, `0.8`, ...). Os commits do robô levam `dados: AAAA-MM-DD` e não contam como versão.
+- **Versão de cada arquivo:** é a versão do último commit que o alterou, a mesma que o GitHub mostra ao lado do arquivo.
+- **Cabeçalho:** ao alterar um arquivo de código ou de eventos, atualize a linha `Versão` no cabeçalho dele, ou crie a linha se ainda não existir. Os arquivos de dados gerados pelo script não levam versão.
+- **Registro:** a versão de cada arquivo fica registrada no `contexto.md` do projeto.
 
 ## Licenças
 

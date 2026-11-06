@@ -1,4 +1,7 @@
 /* Eventos políticos marcados no gráfico e na tabela. Pode editar à mão.
+ * Versão 0.7
+ *
+ * Datas conferidas na Wikipédia em português (páginas de cada eleição, posse e governo).
  *
  * escolhas: eleições (diretas) e escolhas indiretas, mais as posses de vices que assumiram.
  *   data  : dia da votação (ou do início do exercício, no caso de vice)
@@ -31,7 +34,7 @@ window.IBOV_EVENTOS = {
   ],
   governos: [
     { desde: "15/03/1967", nome: "Costa e Silva" },
-    { desde: "31/08/1969", nome: "Junta Militar" },
+    { desde: "01/09/1969", nome: "Junta Militar" },   // AI-12; Costa e Silva afastado em 31/08
     { desde: "30/10/1969", nome: "Médici" },
     { desde: "15/03/1974", nome: "Geisel" },
     { desde: "15/03/1979", nome: "Figueiredo" },
