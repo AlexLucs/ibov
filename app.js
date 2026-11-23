@@ -1,4 +1,5 @@
 /* Página do Ibovespa histórico.
+ * Versão 0.8
  *
  * Entradas (carregadas antes deste arquivo, ver index.html):
  *   window.IBOV_HISTORICO  dados_historicos.js — fechamentos e inflação embutidos
@@ -197,6 +198,7 @@
       noDia: base < apos - 1,                                   // houve pregão no próprio dia
       dia: ok(apos) ? exibida[apos] / exibida[base] - 1 : null,
       semana: ok(apos + 4) ? exibida[apos + 4] / exibida[base] - 1 : null,
+      mes: ok(apos + 20) ? exibida[apos + 20] / exibida[base] - 1 : null,  // 21º pregão
     };
   }
 
@@ -215,7 +217,9 @@
         : `<td class="${classeSinal(r.dia)}">${fmtPct(r.dia)}<span class="barra" style="width:${Math.round(Math.abs(r.dia) / maxAbs * 60)}px"></span></td>`;
       const celSemana = r.semana != null ? `<td class="${classeSinal(r.semana)}">${fmtPct(r.semana)}</td>`
         : `<td class="mut">${r.dia == null ? 'aguardando' : 'em andamento'}</td>`;
-      return `<tr tabindex="0" data-k="${k}"><td>${ano}</td><td>${marca}${esc(ev.nome)}${detalhe}</td><td>${vespera}</td>${celDia}${celSemana}</tr>`;
+      const celMes = r.mes != null ? `<td class="${classeSinal(r.mes)}">${fmtPct(r.mes)}</td>`
+        : `<td class="mut">${r.dia == null ? 'aguardando' : 'em andamento'}</td>`;
+      return `<tr tabindex="0" data-k="${k}"><td>${ano}</td><td>${marca}${esc(ev.nome)}${detalhe}</td><td>${vespera}</td>${celDia}${celSemana}${celMes}</tr>`;
     }).reverse().join('');                                   // mais recente no topo
   }
 

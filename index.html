@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ibovespa histórico</title>
 <style>
+/* Versão 0.8 */
 /* Layout: uma coluna — controles, gráfico, faixa de estatísticas do período, tabela de escolhas presidenciais.
    Sem recursos externos: fontes do sistema, biblioteca do gráfico em vendor/. */
 :root{
@@ -58,7 +59,7 @@ th,td{padding:9px 12px;text-align:right;white-space:nowrap;border-bottom:1px sol
 th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
 th:nth-child(-n+2),td:nth-child(-n+2){text-align:left}
 td{font-family:var(--mono);font-variant-numeric:tabular-nums}
-td:nth-child(2){font-family:var(--display)}
+td:nth-child(2){font-family:var(--display);white-space:normal}  /* a observação dos vices quebra linha para a tabela caber sem rolagem */
 tbody tr{cursor:pointer} tbody tr:hover{background:var(--accent-soft)}
 tbody tr:last-child td{border-bottom:0}
 .det{color:var(--muted);font-size:12px}
@@ -98,10 +99,10 @@ footer,.nota-tabela{font-size:12px;color:var(--muted);line-height:1.5;margin:0}
 
   <h2>Reação às escolhas presidenciais</h2>
   <div class="tabela"><table>
-    <thead><tr><th>Ano</th><th>Escolhido</th><th>Véspera</th><th>Dia seguinte</th><th>Semana</th></tr></thead>
+    <thead><tr><th>Ano</th><th>Escolhido</th><th>Véspera</th><th>Dia seguinte</th><th>Semana</th><th>1 mês</th></tr></thead>
     <tbody id="eventos"></tbody>
   </table></div>
-  <p class="nota-tabela">Variação contra o fechamento do último pregão antes da votação; segue o modo escolhido acima (nominal ou real). "Semana" é o 5º pregão depois da votação. Até 1985 o presidente foi escolhido de forma indireta, pelo Congresso (1969) ou pelo Colégio Eleitoral (1974–1985). * Votação ou posse em dia de pregão: a variação inclui o pregão do próprio dia. "→" indica o vice que assumiu a presidência no mandato; as linhas com ▸ marcam o dia em que ele assumiu (interinamente, quando houve afastamento). Clique numa linha para ver o período no gráfico.</p>
+  <p class="nota-tabela">Variação contra o fechamento do último pregão antes da votação; segue o modo escolhido acima (nominal ou real). "Semana" é o 5º pregão depois da votação e "1 mês", o 21º. Até 1985 o presidente foi escolhido de forma indireta, pelo Congresso (1969) ou pelo Colégio Eleitoral (1974–1985). * Votação ou posse em dia de pregão: a variação inclui o pregão do próprio dia. "→" indica o vice que assumiu a presidência no mandato; as linhas com ▸ marcam o dia em que ele assumiu (interinamente, quando houve afastamento). Clique numa linha para ver o período no gráfico.</p>
 
   <footer><span id="infoRecente"></span>Fonte: B3 (planilha IBOVDIA 1968–1997 e "Evolução Diária" 1998 em diante). Inflação: IPCA (IBGE, a partir de 1980) e IGP-DI (FGV), mensais, via Banco Central; no modo real a inflação do mês é distribuída pelos dias. No modo nominal, antes de 1994 as variações incluem inflação alta. Nos primeiros anos a B3 publica poucos algarismos significativos. Gráfico: Apache ECharts.</footer>
 </div>

@@ -34,6 +34,8 @@ O padrão ao abrir é escala **Linear** e correção **Real · IPCA**.
 | `vendor/echarts.min.js` | Apache ECharts 5.4.3 (biblioteca do gráfico, licença Apache 2.0) | — |
 | `.github/workflows/atualizar.yml` | Execução diária no GitHub Actions | — |
 | `.github/dependabot.yml` | Propostas mensais de atualização de actions e dependências | — |
+| `ibovespa_diario_1968_2026.csv` | Referência: série diária consolidada (`data;fechamento;fonte`) usada para montar o histórico, até 26/10/2026. A página e o script não leem este arquivo | ninguém (não é atualizado) |
+| `inflacao_mensal.csv` | Referência: inflação mensal 1968–09/2026 (IGP-DI, IPCA e encadeado) usada para montar o histórico. A página e o script não leem este arquivo | ninguém (não é atualizado) |
 
 A página carrega `ibov_recente.js` se ele existir. Os dados dele substituem os embutidos a partir da primeira data que ele traz. Se o arquivo faltar ou estiver malformado, a página usa só os dados embutidos e registra o erro no console do navegador (F12).
 
@@ -110,7 +112,7 @@ Tipos: `direta`, `indireta` e `vice` (vice que assumiu; use `obs` para o context
 - **Inflação:** IPCA (IBGE, série SGS 433, a partir de 1980) e IGP-DI (FGV, série SGS 190), mensais, via API do Banco Central.
 - **Correção diária:** a inflação de cada mês é distribuída geometricamente pelos dias do mês, para não haver degraus no dia 1º. Depois do último mês divulgado, o índice de preços fica constante. O IGP-DI costuma sair alguns dias antes do IPCA, então por alguns dias do mês os dois modos reais terminam em meses diferentes; a nota acima do gráfico informa até quando cada um vai.
 - **Eventos políticos:** datas de eleições, posses e governos conferidas na Wikipédia em português.
-- **Reação a eventos:** base = último pregão antes da data. "Dia seguinte" = primeiro pregão depois da data; "Semana" = 5º pregão depois. Quando a votação ou posse caiu num dia de pregão (marcado com *), a variação inclui o pregão do próprio dia.
+- **Reação a eventos:** base = último pregão antes da data. "Dia seguinte" = primeiro pregão depois da data; "Semana" = 5º pregão depois; "1 mês" = 21º pregão depois (cerca de um mês de pregões). Quando a votação ou posse caiu num dia de pregão (marcado com *), a variação inclui o pregão do próprio dia.
 
 ## Versões
 
